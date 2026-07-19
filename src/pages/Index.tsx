@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Plus, Upload, Search, Filter } from 'lucide-react';
+import { Calendar, Plus, Upload, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -21,7 +21,7 @@ interface Appointment {
   created_at: string;
 }
 
-const categories = ['GP', 'Dentist', 'Psych', 'Blood Test', 'Medication', 'Cardio', 'Other'];
+const categories = ['GP', 'Dentist', 'Psych', 'Blood Test', 'Medication', 'Cardio', 'Other', 'Dermatology'];
 
 export default function Index() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -29,6 +29,8 @@ export default function Index() {
   const [filterCategory, setFilterCategory] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -43,19 +45,28 @@ export default function Index() {
 
   // Fetch appointments
   const fetchAppointments = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/appointments');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      // Ensure data is an array
+      console.log('Fetched appointments:', data);
       if (Array.isArray(data)) {
         setAppointments(data);
       } else {
         console.error('API returned non-array data:', data);
         setAppointments([]);
+        setError('Invalid data format from server');
       }
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
       setAppointments([]);
+      setError(error instanceof Error ? error.message : 'Failed to load appointments');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -166,12 +177,13 @@ export default function Index() {
     }
   };
 
-  // Filter appointments - ensure appointments is an array
+  // Filter appointments
   const filteredAppointments = Array.isArray(appointments) ? appointments.filter(a => {
     const matchesSearch = 
       a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.provider?.toLowerCase().includes(searchTerm.toLowerCase());
+      a.provider?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.category?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory ? a.category === filterCategory : true;
     return matchesSearch && matchesCategory;
   }) : [];
@@ -185,6 +197,7 @@ export default function Index() {
       'Blood Test': '🧪',
       Medication: '💊',
       Cardio: '❤️',
+      Dermatology: '🔬',
       Other: '📋',
     };
     return iconMap[category] || '📋';
@@ -263,9 +276,27 @@ export default function Index() {
           </CardContent>
         </Card>
 
+        {/* Error State */}
+        {error && (
+          <Card className="mb-6 border-red-200 bg-red-50">
+            <CardContent className="p-4 flex items-center space-x-2 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+              <Button variant="ghost" size="sm" onClick={fetchAppointments}>
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Appointments List */}
         <div className="h-[500px] overflow-y-auto">
-          {filteredAppointments.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+              <span className="ml-2 text-slate-600">Loading appointments...</span>
+            </div>
+          ) : filteredAppointments.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Calendar className="w-8 h-8 text-slate-400" />

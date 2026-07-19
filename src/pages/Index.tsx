@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Plus, Upload, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
+import { Calendar, Plus, Upload, Search, Filter, Loader2, AlertCircle, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -23,10 +23,13 @@ interface Appointment {
 
 const categories = ['GP', 'Dentist', 'Psych', 'Blood Test', 'Medication', 'Cardio', 'Other', 'Dermatology'];
 
+type SortOption = 'date_asc' | 'date_desc' | 'created_desc';
+
 export default function Index() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('date_asc');
   const [showForm, setShowForm] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -177,17 +180,6 @@ export default function Index() {
     }
   };
 
-  // Filter appointments
-  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(a => {
-    const matchesSearch = 
-      a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.provider?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.category?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory ? a.category === filterCategory : true;
-    return matchesSearch && matchesCategory;
-  }) : [];
-
   // Get category icon
   const getCategoryIcon = (category: string) => {
     const iconMap: Record<string, string> = {
@@ -202,6 +194,49 @@ export default function Index() {
     };
     return iconMap[category] || '📋';
   };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
+
+  // Sort and filter appointments
+  const sortedAppointments = Array.isArray(appointments) 
+    ? [...appointments].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        const createdA = new Date(a.created_at);
+        const createdB = new Date(b.created_at);
+
+        switch (sortBy) {
+          case 'date_asc':
+            return dateA - dateB;
+          case 'date_desc':
+            return dateB - dateA;
+          case 'created_desc':
+            return createdB - createdA;
+          default:
+            return 0;
+        }
+      })
+    : [];
+
+  const filteredAppointments = sortedAppointments.filter(a => {
+    const matchesSearch = 
+      a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.provider?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory ? a.category === filterCategory : true;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -228,7 +263,7 @@ export default function Index() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Search & Filter */}
+        {/* Search & Filter & Sort */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
@@ -250,6 +285,18 @@ export default function Index() {
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
+            </select>
+          </div>
+          <div className="relative">
+            <ArrowUpDown className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="date_asc">Date (Oldest First)</option>
+              <option value="date_desc">Date (Newest First)</option>
+              <option value="created_desc">Recently Added</option>
             </select>
           </div>
         </div>
@@ -324,7 +371,7 @@ export default function Index() {
                           <Badge>{appointment.category}</Badge>
                         </div>
                         <h3 className="text-lg font-semibold text-slate-900">{appointment.title || appointment.category}</h3>
-                        <p className="text-sm text-slate-500">{appointment.date}</p>
+                        <p className="text-sm text-slate-500">{formatDate(appointment.date)}</p>
                         {appointment.provider && (
                           <p className="text-sm text-slate-600 mt-1">Provider: {appointment.provider}</p>
                         )}

@@ -46,9 +46,16 @@ export default function Index() {
     try {
       const response = await fetch('/api/appointments');
       const data = await response.json();
-      setAppointments(data);
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setAppointments(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setAppointments([]);
+      }
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
+      setAppointments([]);
     }
   }, []);
 
@@ -159,15 +166,15 @@ export default function Index() {
     }
   };
 
-  // Filter appointments
-  const filteredAppointments = appointments.filter(a => {
+  // Filter appointments - ensure appointments is an array
+  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(a => {
     const matchesSearch = 
       a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.provider?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory ? a.category === filterCategory : true;
     return matchesSearch && matchesCategory;
-  });
+  }) : [];
 
   // Get category icon
   const getCategoryIcon = (category: string) => {

@@ -203,12 +203,12 @@ export default function Index() {
       day: 'numeric',
       year: 'numeric',
       hour: 'numeric',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   // Sort and filter appointments
-  const sortedAppointments = Array.isArray(appointments) 
+  const sortedAppointments = Array.isArray(appointments)
     ? [...appointments].sort((a, b) => {
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
@@ -217,11 +217,11 @@ export default function Index() {
 
         switch (sortBy) {
           case 'date_asc':
-            return dateA - dateB;
+            return dateA.getTime() - dateB.getTime();
           case 'date_desc':
-            return dateB - dateA;
+            return dateB.getTime() - dateA.getTime();
           case 'created_desc':
-            return createdB - createdA;
+            return createdB.getTime() - createdA.getTime();
           default:
             return 0;
         }
@@ -229,7 +229,7 @@ export default function Index() {
     : [];
 
   const filteredAppointments = sortedAppointments.filter(a => {
-    const matchesSearch = 
+    const matchesSearch =
       a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.provider?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -250,7 +250,7 @@ export default function Index() {
               </div>
               <h1 className="text-2xl font-bold text-slate-900">MedLog</h1>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowForm(true)}
               className="bg-teal-600 hover:bg-teal-700"
             >
@@ -270,7 +270,7 @@ export default function Index() {
             <Input
               placeholder="Search appointments..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -278,12 +278,14 @@ export default function Index() {
             <Filter className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={e => setFilterCategory(e.target.value)}
               className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-teal-500"
             >
               <option value="">All Categories</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           </div>
@@ -291,7 +293,7 @@ export default function Index() {
             <ArrowUpDown className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={e => setSortBy(e.target.value as SortOption)}
               className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-teal-500"
             >
               <option value="date_asc">Date (Oldest First)</option>
@@ -303,7 +305,8 @@ export default function Index() {
 
         {/* File Drop Zone */}
         <Card className="mb-6 border-dashed border-2 border-slate-300 bg-slate-50/50">
-          <CardContent className="p-6 text-center cursor-pointer"
+          <CardContent
+            className="p-6 text-center cursor-pointer"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -319,7 +322,9 @@ export default function Index() {
               className="hidden"
               onChange={handleFileInput}
             />
-            <Badge variant="secondary">Click or drag files to attach to appointments</Badge>
+            <Badge variant="secondary">
+              Click or drag files to attach to appointments
+            </Badge>
           </CardContent>
         </Card>
 
@@ -348,14 +353,15 @@ export default function Index() {
               <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Calendar className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No appointments found</h3>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">
+                No appointments found
+              </h3>
               <p className="text-slate-500 mb-4">
-                {searchTerm || filterCategory ? 'Try adjusting your search or filter' : 'Add your first appointment to get started'}
+                {searchTerm || filterCategory
+                  ? 'Try adjusting your search or filter'
+                  : 'Add your first appointment to get started'}
               </p>
-              <Button 
-                onClick={() => setShowForm(true)}
-                variant="outline"
-              >
+              <Button onClick={() => setShowForm(true)} variant="outline">
                 Add First Appointment
               </Button>
             </div>
@@ -370,16 +376,22 @@ export default function Index() {
                           <span className="text-2xl">{getCategoryIcon(appointment.category)}</span>
                           <Badge>{appointment.category}</Badge>
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-900">{appointment.title || appointment.category}</h3>
+                        <h3 className="text-lg font-semibold text-slate-900">
+                          {appointment.title || appointment.category}
+                        </h3>
                         <p className="text-sm text-slate-500">{formatDate(appointment.date)}</p>
                         {appointment.provider && (
-                          <p className="text-sm text-slate-600 mt-1">Provider: {appointment.provider}</p>
+                          <p className="text-sm text-slate-600 mt-1">
+                            Provider: {appointment.provider}
+                          </p>
                         )}
                         {appointment.notes && (
                           <p className="text-sm text-slate-700 mt-2">{appointment.notes}</p>
                         )}
                         {appointment.location && (
-                          <p className="text-xs text-slate-500 mt-1">Location: {appointment.location}</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Location: {appointment.location}
+                          </p>
                         )}
                         {appointment.cost && (
                           <p className="text-xs text-slate-500">Cost: {appointment.cost}</p>
@@ -399,7 +411,9 @@ export default function Index() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-lg mx-4">
             <CardContent className="p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">Add New Appointment</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-4">
+                Add New Appointment
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="date">Date *</Label>
@@ -407,7 +421,7 @@ export default function Index() {
                     id="date"
                     type="date"
                     value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    onChange={e => setFormData({ ...formData, date: e.target.value })}
                     required
                   />
                 </div>
@@ -416,13 +430,15 @@ export default function Index() {
                   <select
                     id="category"
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500"
                     required
                   >
                     <option value="">Select category</option>
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -432,7 +448,7 @@ export default function Index() {
                     id="title"
                     placeholder="e.g., Annual Checkup"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={e => setFormData({ ...formData, title: e.target.value })}
                   />
                 </div>
                 <div>
@@ -441,7 +457,7 @@ export default function Index() {
                     id="provider"
                     placeholder="Dr. Smith"
                     value={formData.provider}
-                    onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+                    onChange={e => setFormData({ ...formData, provider: e.target.value })}
                   />
                 </div>
                 <div>
@@ -450,7 +466,7 @@ export default function Index() {
                     id="location"
                     placeholder="Fairfield Medical Centre"
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    onChange={e => setFormData({ ...formData, location: e.target.value })}
                   />
                 </div>
                 <div>
@@ -459,7 +475,7 @@ export default function Index() {
                     id="cost"
                     placeholder="$149"
                     value={formData.cost}
-                    onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                    onChange={e => setFormData({ ...formData, cost: e.target.value })}
                   />
                 </div>
                 <div>
@@ -468,7 +484,7 @@ export default function Index() {
                     id="notes"
                     placeholder="Additional details..."
                     value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    onChange={e => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
                   />
                 </div>
@@ -476,8 +492,8 @@ export default function Index() {
                   <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700">
                     Save Appointment
                   </Button>
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={() => setShowForm(false)}
                   >

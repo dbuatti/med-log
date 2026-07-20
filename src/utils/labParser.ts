@@ -87,7 +87,6 @@ const ALIASES: Record<string, string> = {
   'b12': 'Vitamin B12',
   'active vit. b12': 'Active B12',
   'active b12': 'Active B12',
-  'active b12': 'Active B12',
   'egfr': 'eGFR',
 };
 

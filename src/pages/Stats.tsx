@@ -35,7 +35,7 @@ export default function Stats() {
   const labTrends = useMemo(() => buildLabTrends(appointments), [appointments]);
 
   const staticAlerts: { text: string; severity: 'high' | 'medium' }[] = [
-    { text: 'Persistent neutropenia & thrombocytopenia — present across Feb 2025 and Jul 2026 tests. Monitor WCC, neutrophils, platelets', severity: 'high' },
+    { text: 'Persistent thrombocytopenia — platelets 139→141 (Aug 2026 follow-up). Neutropenia resolved (neutrophils/WCC back to normal). Review in 3 months', severity: 'high' },
     { text: 'Cholesterol rising — total 4.4→6.4, LDL 2.4→4.3 over 17 months. Lifestyle review + consider statin if continues rising', severity: 'high' },
     { text: 'Sodium elevated (146, should be <145) — monitor hydration', severity: 'medium' },
     { text: 'Mitral valve regurgitation — contraindication for pseudoephedrine', severity: 'medium' },

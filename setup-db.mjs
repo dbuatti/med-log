@@ -11,7 +11,7 @@ await sql`
     notes TEXT,
     provider TEXT,
     location TEXT,
-    cost DECIMAL(10,2),
+    cost TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
   )
@@ -50,7 +50,7 @@ console.log('Tasks table ready');
 console.log('Creating health_plan table...');
 await sql`
   CREATE TABLE IF NOT EXISTS health_plan (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     month_number INT NOT NULL,
     title TEXT NOT NULL,
     focus_area TEXT NOT NULL,
@@ -62,8 +62,7 @@ await sql`
     started_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
     review_answers JSONB,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
   )
 `;
 console.log('Health_plan table ready');
